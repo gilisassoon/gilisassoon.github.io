@@ -71,13 +71,18 @@ section{padding:96px 0 0}
 .skills .gap{margin-top:18px}
 /* pages */
 .page{display:none;padding-top:6vh}
-body[data-page="home"] .home,body[data-page="work"] #work,body[data-page="art"] #art,body[data-page="cv"] #cv{display:block}
+body[data-page="home"] .home,body[data-page="work"] #work,body[data-page="art"] #art,body[data-page="cv"] #cv,body[data-page="contact"] #contact{display:block}
 body:not([data-page="home"]) .home{display:none}
 .home{min-height:calc(100vh - 260px);display:grid;place-content:center}
 .home .hero{padding:0}
 .pagehead{text-align:center;margin-bottom:8vh}
 .pagehead h2,.cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
 header nav a.on{color:var(--muted)}
+.contact{list-style:none;margin:0 auto;padding:0;display:grid;gap:34px;justify-items:center;text-align:center}
+.contact li{display:grid;gap:8px}
+body[data-page="contact"] footer{visibility:hidden}
+.contact a{font-family:var(--display);font-weight:300;font-size:clamp(24px,3vw,36px);letter-spacing:.02em}
+.contact a:hover{color:var(--muted)}
 .cvhead{display:grid;gap:14px;align-content:start}
 .cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
 .cvhead .back:hover{color:var(--ink)}
@@ -133,6 +138,7 @@ footer a:hover{color:var(--muted)}
       <a href="#work">Work</a>
       <a href="#art">Art</a>
       <a href="#cv">CV</a>
+      <a href="#contact">Contact</a>
     </nav>
   </header>
 
@@ -228,7 +234,16 @@ footer a:hover{color:var(--muted)}
     </div>
   </section>
 
-  <footer id="contact">
+  <section id="contact" class="page" aria-label="Contact">
+    <div class="pagehead"><h2>Contact</h2></div>
+    <ul class="contact">
+      <li><span class="mono">Phone</span><a href="tel:+972544892777">+972-54-4892777</a></li>
+      <li><span class="mono">Email</span><a href="mailto:gili1307@gmail.com">gili1307@gmail.com</a></li>
+      <li><span class="mono">Instagram</span><a href="https://www.instagram.com/gilisass__/" target="_blank" rel="noopener">@gilisass__</a></li>
+    </ul>
+  </section>
+
+  <footer id="foot">
     <a href="mailto:gili1307@gmail.com">gili1307@gmail.com</a>
     <div class="links">
       <a href="https://www.instagram.com/gilisass__/" target="_blank" rel="noopener">Instagram</a>
@@ -352,7 +367,7 @@ addEventListener('keydown',e=>{
 })();
 
 // Four pages: home (name), work, art, cv. The address hash picks the page.
-const PAGES=['work','art','cv'];
+const PAGES=['work','art','cv','contact'];
 function route(){
   const h=location.hash.slice(1);
   const page=PAGES.includes(h)?h:'home';
