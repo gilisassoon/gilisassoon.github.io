@@ -74,7 +74,7 @@ section{padding:96px 0 0}
 .item .img.row:hover{opacity:1}
 .item .img.row img,.item .img.row video{position:static;min-width:0;width:0;height:auto;object-fit:cover;cursor:pointer;transition:opacity .3s}
 .item .img.row img:hover,.item .img.row video:hover{opacity:.8}
-@media (max-width:700px){.item .img.row{flex-wrap:wrap;gap:8px}.item .img.row>*{flex:1 1 calc(50% - 4px)!important}}
+@media (max-width:700px){.item .img.row{flex-wrap:wrap;gap:8px;justify-content:center}.item .img.row>.wide{flex:1 1 100%!important;order:-1}.item .img.row>.tall-only{max-width:60%}}
 /* a row of vertical social videos */
 .item .img.reels{aspect-ratio:auto;max-height:none;background:none;display:flex;gap:12px;justify-content:center;overflow:visible}
 .item .img.reels:hover{opacity:1}
@@ -82,6 +82,7 @@ section{padding:96px 0 0}
 .item .img.reels video:hover{opacity:.8}
 @media (max-width:700px){.item .img.reels{flex-wrap:wrap;gap:8px}.item .img.reels video{width:calc((100% - 16px)/3)}}
 .item .cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:14px}
+@media (max-width:700px){.item .cap{flex-direction:column;align-items:flex-start;gap:4px}.cap .snd{margin-left:10px}}
 
 .about{display:grid;grid-template-columns:1fr 1fr;gap:32px;border-top:1px solid var(--line);padding-top:28px}
 .about p{margin:0;max-width:44ch}
@@ -154,7 +155,9 @@ footer a:hover{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}
 .sitesnd{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));z-index:15;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid rgba(243,239,232,.3);border-radius:999px;padding:7px 14px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .sitesnd:hover,.sitesnd[aria-pressed="true"]{border-color:var(--ink)}
-body:has(.lb:not([hidden])) .sitesnd{display:none}
+body:has(.lb:not([hidden])) .sitesnd,body:not([data-page="home"]) .sitesnd{display:none}
+.ftsnd{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.ftsnd:hover{color:var(--muted)}
 /* keep content clear of the phone notch and home bar */
 .wrap{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
 header{padding-top:max(28px,env(safe-area-inset-top))}
@@ -282,20 +285,21 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
     </ul>
   </section>
 
-  <button type="button" class="sitesnd" id="sitesnd" aria-pressed="false">Sound off</button>
+  <button type="button" class="sitesnd" id="sitesnd" data-sitesnd aria-pressed="false">Sound off</button>
 
   <footer id="foot">
     <a href="mailto:gili1307@gmail.com">gili1307@gmail.com</a>
     <div class="links">
       <a href="https://www.instagram.com/gilisass__/" target="_blank" rel="noopener">Instagram</a>
       <a href="#cv">CV</a>
+      <button type="button" class="ftsnd" data-sitesnd aria-pressed="false">Sound off</button>
     </div>
   </footer>
 
 </div>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbt">
   <div class="lb-in">
-    <div class="lb-top"><span class="mono" id="lbt"></span><span class="lb-btns"><button type="button" class="snd" id="lbsnd" hidden>Sound off</button><button type="button" id="lbclose">Close</button></span></div>
+    <div class="lb-top"><span class="mono" id="lbt"></span><span class="lb-btns"><button type="button" class="snd" id="lbsnd" hidden>Listen</button><button type="button" id="lbclose">Close</button></span></div>
     <div class="lb-photo" id="lbp">
       <video id="lbv" controls playsinline hidden></video>
       <img id="lbimg" alt="" hidden>
@@ -355,7 +359,7 @@ let snd=null,sndSrc='';
 const lbsnd=document.getElementById('lbsnd');
 function syncSound(){
   const on=!!(snd&&!snd.paused);
-  document.querySelectorAll('.snd').forEach(b=>{b.textContent=on?'Sound on':'Sound off';b.setAttribute('aria-pressed',String(on))});
+  document.querySelectorAll('.snd').forEach(b=>{b.textContent=on?'Stop':'Listen';b.setAttribute('aria-pressed',String(on))});
 }
 function toggleSound(src){
   if(!snd||sndSrc!==src){if(snd)snd.pause();snd=new Audio(src);snd.loop=true;sndSrc=src;snd.addEventListener('pause',syncSound);snd.addEventListener('play',syncSound)}
@@ -433,9 +437,12 @@ addEventListener('keydown',e=>{
         if(m.video){el=document.createElement('video');el.src=m.video;if(m.poster)el.poster=m.poster;el.muted=true;el.loop=true;el.playsInline=true;el.autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches;el.preload='metadata'}
         else{el=document.createElement('img');el.src=m.img;el.alt=p.title;el.loading='lazy'}
         el.style.flex=m.ar+' 1 0';el.style.aspectRatio=String(m.ar);
+        if(m.ar>1.2)el.classList.add('wide');
         el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPlayer(p,k)});
         box.appendChild(el);
       });
+      const talls=p.media.filter(m=>m.ar<=1.2);
+      if(talls.length===1)box.querySelectorAll(':scope > :not(.wide)').forEach(el=>el.classList.add('tall-only'));
     }else if(p.reels){
       // a row of short vertical videos, all playing silently; click one to watch it with sound
       box.classList.add('reels');
@@ -468,7 +475,7 @@ addEventListener('keydown',e=>{
     cap.innerHTML='<span></span><span class="mono"></span>';
     cap.children[0].textContent=p.title;cap.children[1].textContent=p.type;
     if(p.sound){
-      const b=document.createElement('button');b.type='button';b.className='snd';b.textContent='Sound off';b.setAttribute('aria-pressed','false');
+      const b=document.createElement('button');b.type='button';b.className='snd';b.textContent='Listen';b.setAttribute('aria-pressed','false');
       b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleSound(p.sound)});
       cap.children[0].appendChild(b);
     }
@@ -565,8 +572,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
   }
   function stopSound(){soundOn=false;setLevel();syncSiteBtn()}
   function syncSiteBtn(){
-    if(!sndBtn)return;
-    sndBtn.textContent=soundOn?'Sound on':'Sound off';sndBtn.setAttribute('aria-pressed',String(soundOn));
+    document.querySelectorAll('[data-sitesnd]').forEach(b=>{b.textContent=soundOn?'Sound on':'Sound off';b.setAttribute('aria-pressed',String(soundOn))});
   }
   function thump(strength){
     if(!soundOn||!actx)return;
@@ -583,7 +589,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
   }
   // other sounds on the site (videos, the installation track) turn the drone down while they play
   window.siteSound={duck(on){duckLevel=on?.12:1;setLevel()}};
-  if(sndBtn)sndBtn.addEventListener('click',()=>soundOn?stopSound():startSound());
+  document.querySelectorAll('[data-sitesnd]').forEach(b=>b.addEventListener('click',()=>soundOn?stopSound():startSound()));
 
   let flashUntil=0,lastSeen=0,drawnOnce=false;
   function draw(time){
