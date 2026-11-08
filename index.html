@@ -354,6 +354,27 @@ const PROJECTS = [
 ];
 /* ======================================================================== */
 
+// Silent looping videos: iPhones only autoplay a video if it is muted *in the markup* and plays inline.
+// Each one plays while it is on screen and pauses when it scrolls away. If the phone still blocks it
+// (for example in Low Power Mode), the first tap anywhere on the page starts every waiting video.
+const waitingVideos=new Set();
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const videoObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    const v=en.target;
+    if(en.isIntersecting&&!reduceMotion){v.play().then(()=>waitingVideos.delete(v)).catch(()=>waitingVideos.add(v))}
+    else{v.pause();waitingVideos.delete(v)}
+  });
+},{threshold:.15}):null;
+function loopVideo(v){
+  v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;
+  v.setAttribute('muted','');v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
+  v.preload='metadata';
+  if(videoObserver)videoObserver.observe(v);else if(!reduceMotion){v.autoplay=true}
+}
+['touchstart','click'].forEach(ev=>addEventListener(ev,()=>{waitingVideos.forEach(v=>v.play().then(()=>waitingVideos.delete(v)).catch(()=>{}))},{passive:true}));
+const touchOnly=matchMedia('(hover: none)').matches;
+
 // Background sound for projects that have one (plays only when the visitor presses the button)
 let snd=null,sndSrc='';
 const lbsnd=document.getElementById('lbsnd');
@@ -434,7 +455,7 @@ addEventListener('keydown',e=>{
       box.classList.add('row');
       p.media.forEach((m,k)=>{
         let el;
-        if(m.video){el=document.createElement('video');el.src=m.video;if(m.poster)el.poster=m.poster;el.muted=true;el.loop=true;el.playsInline=true;el.autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches;el.preload='metadata'}
+        if(m.video){el=document.createElement('video');if(m.poster)el.poster=m.poster;loopVideo(el);el.src=m.video}
         else{el=document.createElement('img');el.src=m.img;el.alt=p.title;el.loading='lazy'}
         el.style.flex=m.ar+' 1 0';el.style.aspectRatio=String(m.ar);
         if(m.ar>1.2)el.classList.add('wide');
@@ -447,12 +468,11 @@ addEventListener('keydown',e=>{
       // a row of short vertical videos, all playing silently; click one to watch it with sound
       box.classList.add('reels');
       p.reels.forEach((r,k)=>{
-        const v=document.createElement('video');v.src=r.loop;v.poster=r.poster;v.muted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload='metadata';
+        const v=document.createElement('video');v.poster=r.poster;loopVideo(v);v.src=r.loop;
         v.setAttribute('aria-label',p.title+': '+r.name);
         v.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPlayer(p,k)});
         box.appendChild(v);
       });
-      if(matchMedia('(prefers-reduced-motion: reduce)').matches)box.querySelectorAll('video').forEach(v=>{v.autoplay=false});
     }else if(p.photos){
       // photo projects: show every photo in turn, one every 3 seconds
       box.classList.add('slides');if(p.fit==='contain')box.classList.add('float');
@@ -465,7 +485,9 @@ addEventListener('keydown',e=>{
       }
     }else if(p.image&&!p.row){if(p.fit==='contain')box.classList.add('float');const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
     if(p.video&&!p.row){
-      const v=document.createElement('video');v.src=p.video;v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
+      const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
+      if(touchOnly)loopVideo(v);   // phones have no hover, so the preview plays by itself when it is on screen
+      v.src=p.video;
       if(p.image){v.poster=p.image;box.innerHTML=''}
       box.appendChild(v);
       a.addEventListener('mouseenter',()=>v.play().catch(()=>{}));
