@@ -539,22 +539,24 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
   function buildAudio(){
     actx=new (window.AudioContext||window.webkitAudioContext)();
     master=actx.createGain();master.gain.value=0;master.connect(actx.destination);
-    const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;lp.Q.value=.7;
+    const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;lp.Q.value=.5;
     const drone=actx.createGain();drone.gain.value=.5;lp.connect(drone);drone.connect(master);
-    [[55,0,'sine',.6],[82.41,4,'sine',.35],[110,-6,'triangle',.12]].forEach(([f,det,type,vol])=>{
+    // 128 Hz healing tone: the fundamental, a slightly detuned twin that makes a slow shimmer,
+    // and very quiet octave and fifth above it, all pure sine waves
+    [[128,0,'sine',.55],[128.4,0,'sine',.3],[256,0,'sine',.08],[192,0,'sine',.05],[64,0,'sine',.12]].forEach(([f,det,type,vol])=>{
       const o=actx.createOscillator();o.type=type;o.frequency.value=f;o.detune.value=det;
       const g=actx.createGain();g.gain.value=vol;o.connect(g);g.connect(lp);o.start();
     });
     // slow movement so the drone breathes
-    const lfo=actx.createOscillator();lfo.frequency.value=.06;const lfoAmt=actx.createGain();lfoAmt.gain.value=160;
+    const lfo=actx.createOscillator();lfo.frequency.value=.05;const lfoAmt=actx.createGain();lfoAmt.gain.value=250;
     lfo.connect(lfoAmt);lfoAmt.connect(lp.frequency);lfo.start();
-    const lfo2=actx.createOscillator();lfo2.frequency.value=.11;const lfo2Amt=actx.createGain();lfo2Amt.gain.value=.12;
+    const lfo2=actx.createOscillator();lfo2.frequency.value=.08;const lfo2Amt=actx.createGain();lfo2Amt.gain.value=.15;
     lfo2.connect(lfo2Amt);lfo2Amt.connect(drone.gain);lfo2.start();
   }
   function setLevel(){
     if(!master)return;
     const t=actx.currentTime;master.gain.cancelScheduledValues(t);
-    master.gain.setTargetAtTime(soundOn?.22*duckLevel:0,t,soundOn?1.2:.35);
+    master.gain.setTargetAtTime(soundOn?.16*duckLevel:0,t,soundOn?2.5:.5);
   }
   function startSound(){
     if(!actx)buildAudio();
@@ -568,13 +570,14 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
   function thump(strength){
     if(!soundOn||!actx)return;
     const t0=actx.currentTime+.01;
-    [[0,1],[.17,.6]].forEach(([off,amp])=>{          // lub ... dub
+    // a soft, muffled heartbeat: slow swell in, long gentle fade, like a pulse felt through the body
+    [[0,1],[.2,.55]].forEach(([off,amp])=>{          // lub ... dub
       const o=actx.createOscillator();o.type='sine';
-      o.frequency.setValueAtTime(95,t0+off);o.frequency.exponentialRampToValueAtTime(46,t0+off+.12);
+      o.frequency.setValueAtTime(64,t0+off);o.frequency.exponentialRampToValueAtTime(42,t0+off+.25);
       const g=actx.createGain();g.gain.setValueAtTime(.0001,t0+off);
-      g.gain.exponentialRampToValueAtTime(.9*amp*Math.min(1,strength||1),t0+off+.008);
-      g.gain.exponentialRampToValueAtTime(.0001,t0+off+.32);
-      o.connect(g);g.connect(master);o.start(t0+off);o.stop(t0+off+.35);
+      g.gain.exponentialRampToValueAtTime(.22*amp*Math.min(1,strength||1),t0+off+.045);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+off+.6);
+      o.connect(g);g.connect(master);o.start(t0+off);o.stop(t0+off+.65);
     });
   }
   // other sounds on the site (videos, the installation track) turn the drone down while they play
