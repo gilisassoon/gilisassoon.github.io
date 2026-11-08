@@ -531,7 +531,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     return v;
   }
 
-  // ---- Site sound: a soft low drone with heartbeat thumps on the same beats as the line ----
+  // ---- Site sound: a soft 128 Hz healing drone (heartbeat thumps turned off) ----
   // Made live in the browser (no audio file). It only starts when the visitor asks for it.
   let actx=null,master=null,soundOn=false,duckLevel=1;
   const sndBtn=document.getElementById('sitesnd');
@@ -593,7 +593,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     fill(now);
     // each beat reaching the end of the line blinks the dot and, with sound on, plays a soft thump
     const hit=beats.find(b=>b.t<=now&&b.t>lastSeen);
-    if(hit){lastSeen=hit.t;flashUntil=now+.12;thump(hit.r)}
+    if(hit){lastSeen=hit.t;flashUntil=now+.12}
     if(!tapping) tapBtn.classList.toggle('on',now<flashUntil);
     if(!w||!h||(reduce&&drawnOnce)){requestAnimationFrame(draw);return}
     drawnOnce=true;
@@ -629,7 +629,6 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     base=Math.max(40,Math.min(180,Math.round(60000/iv)));
     bpmEl.textContent=base;
     taps=[];
-    if(!soundOn)startSound();
   });
   if(reduce)bpmEl.textContent=base;
 })();
