@@ -336,7 +336,7 @@ const PROJECTS = [
     row:true,
     media:[ {img:"work/heart-photo.jpg", ar:0.8}, {video:"work/heart-1.mp4", ar:1.646}, {video:"work/heart-2.mp4", ar:0.5625}, {video:"work/heart-3.mp4", ar:0.5625} ] },
   { page:"art", title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
-    photos:["work/photo-1.jpg","work/photo-2e.jpg","work/photo-12e.jpg","work/photo-3.jpg","work/photo-4.jpg","work/photo-10.jpg","work/photo-11.jpg"] },
+    photos:["work/photo-1.jpg","work/photo-red-pair.jpg","work/photo-3.jpg","work/photo-4.jpg","work/photo-10.jpg","work/photo-11.jpg"] },
   { page:"art", title:"Lone & Untamed", type:"Photography", image:"work/photo-8.jpg",
     photos:["work/photo-5.jpg","work/photo-6.jpg","work/photo-7.jpg","work/photo-8.jpg","work/photo-9.jpg"] },
   { page:"art", title:"Unshot",        type:"Digital illustration", image:"work/unshot.jpg", photos:["work/unshot.jpg"] },
@@ -451,7 +451,7 @@ addEventListener('keydown',e=>{
       box.classList.add('slides');if(p.fit==='contain')box.classList.add('float');
       const imgs=p.photos.map((src,k)=>{const im=document.createElement('img');im.src=src;im.alt=p.title+' '+(k+1);im.loading=k?'lazy':'eager';if(!k)im.classList.add('on');
         // vertical photos are shown whole, horizontal ones fill the frame
-        const fit=()=>{if(im.naturalWidth/im.naturalHeight<1.3)im.classList.add('tall')};
+        const fit=()=>{if(im.naturalWidth/im.naturalHeight<1.4)im.classList.add('tall')};
         im.complete?fit():im.addEventListener('load',fit);box.appendChild(im);return im});
       if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&imgs.length>1){
         let k=0;setInterval(()=>{imgs[k].classList.remove('on');k=(k+1)%imgs.length;imgs[k].classList.add('on')},3000);
