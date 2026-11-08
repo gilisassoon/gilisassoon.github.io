@@ -94,6 +94,9 @@ body[data-page="home"] .home,body[data-page="work"] #work,body[data-page="art"] 
 body:not([data-page="home"]) .home{display:none}
 .home{min-height:calc(100vh - 260px);display:grid;place-content:center}
 .home .hero{padding:0}
+.home .pulse{max-width:min(300px,70vw);margin:40px auto 0;gap:10px}
+.home .tap i{width:9px;height:9px}
+.home .tap .mono{font-size:11px}
 .pagehead{text-align:center;margin-bottom:8vh}
 .pagehead h2,.cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
 header nav a.on{color:var(--muted)}
@@ -170,6 +173,10 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
     <div class="hero">
       <h1>Gili Sassoon</h1>
       <p>Multimedia artist / video editor / motion designer</p>
+    </div>
+    <div class="pulse">
+      <div class="frame"><img src="assets/frame-outline.png" alt=""><canvas id="ecg" aria-hidden="true"></canvas></div>
+      <button class="tap" id="tap" type="button" aria-label="Tap four times to set the heartbeat tempo"><i></i><span class="mono" id="bpm">tap</span></button>
     </div>
   </main>
 
@@ -484,7 +491,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
   size();addEventListener('resize',size);
   if(window.ResizeObserver)new ResizeObserver(size).observe(c);
 
-  const speed=150;            // px per second
+  let speed=150;              // px per second; scaled to the line's width below
   let base=64, hover=0, cur=64;
   let beats=[];               // each beat has its own time and shape
 
@@ -521,6 +528,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     // re-measure if the frame changed size (or was hidden when the page loaded)
     if(c.clientWidth!==w||c.clientHeight!==h)size();
     if(!w||!h){if(!reduce)requestAnimationFrame(draw);return}
+    speed=Math.max(40,w/3);    // always about three seconds of heartbeat across the frame
     const now=time/1000;
     cur+=((base+hover)-cur)*.03;
     fill(now);
