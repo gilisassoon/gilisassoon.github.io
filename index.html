@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gili Sassoon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Imbue:opsz,wght@10..100,300;10..100,500&family=Instrument+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: dark photographic page, centred display name, the pulse held inside an ornamental frame. Single dark theme by choice. */
+:root{
+  --sand:#000000;
+  --ink:#f3efe8;
+  --muted:#bdb8b0;
+  --line:#242322;
+  --pulse:#f3efe8;
+  --fill:rgba(0,0,0,.45);
+  --display:"Imbue", "Didot", "Bodoni 72", Georgia, serif;
+  --body:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity;background:var(--sand)}
+body{
+  margin:0;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background:transparent;
+}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:url("assets/bg.jpg") center/cover no-repeat}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted)}
+
+header{display:flex;justify-content:space-between;align-items:center;padding:28px 0}
+header nav{display:flex;gap:28px}
+header a:hover{color:var(--muted)}
+
+.hero{padding:9vh 0 0;text-align:center}
+.hero h1{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(40px,9vw,128px);letter-spacing:.01em;line-height:.9;margin:0;text-transform:uppercase;white-space:nowrap}
+.hero p{font-family:var(--display);font-weight:300;margin:18px 0 0;font-size:clamp(20px,2.2vw,28px);letter-spacing:.06em;color:var(--muted)}
+.hero p .e{color:#55524e}
+
+.pulse{margin:44px auto 0;max-width:860px;display:grid;justify-items:center;gap:18px}
+.frame{position:relative;width:100%;aspect-ratio:16/9}
+.frame img{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.frame canvas{position:absolute;left:19%;right:19%;top:26%;bottom:26%;width:62%;height:48%;display:block}
+.tap{display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 0;cursor:pointer;font:inherit;color:var(--ink)}
+.tap i{width:12px;height:12px;border-radius:50%;border:1px solid var(--ink);display:block;transition:background .08s,transform .08s}
+.tap.on i{background:var(--ink);transform:scale(1.25)}
+.tap .mono{min-width:4.5ch;text-align:left;font-variant-numeric:tabular-nums}
+
+section{padding:96px 0 0}
+
+.grid{display:grid;grid-template-columns:1fr;gap:18vh}
+.item{display:block;scroll-snap-align:center}
+.item .img{position:relative;aspect-ratio:16/9;max-height:78vh;width:100%;background:var(--fill);overflow:hidden;transition:opacity .3s}
+.item .img img,.item .img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.item .img.slides{aspect-ratio:3/2;background:none}
+.item .img.slides img{object-fit:cover;object-position:50% 35%;opacity:0;transition:opacity 1s ease}
+.item .img.slides.float img,.item .img.slides img.tall{object-fit:contain}
+.item .img.slides img.on{opacity:1}
+.item:hover .img{opacity:.85}
+.item .cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:14px}
+
+.about{display:grid;grid-template-columns:1fr 1fr;gap:32px;border-top:1px solid var(--line);padding-top:28px}
+.about p{margin:0;max-width:44ch}
+#skills{padding-top:56px}
+.skills{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.skills .gap{margin-top:18px}
+#cv{padding-top:6vh}
+body:not(.on-cv) #cv{display:none}
+body.on-cv main{display:none}
+.cvhead{display:grid;gap:14px;align-content:start}
+.cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
+.cvhead .back:hover{color:var(--ink)}
+#cv .about{grid-template-columns:1fr;justify-items:center;border-top:0;padding-top:0}
+#cv .cvhead{justify-items:center;text-align:center;margin-bottom:28px}
+#cv .cv{width:100%;max-width:640px}
+#cv .cv > p:first-child{text-align:center}
+#cv .cv h3{text-align:center;border-top:1px solid var(--line);padding-top:22px}
+.cv{display:grid;gap:14px;max-width:62ch}
+.cv p{margin:0;max-width:none}
+.cv h3{margin:26px 0 0;font-weight:400}
+.cv .row{display:grid;grid-template-columns:96px 1fr;gap:16px}
+.cv .yr{padding-top:3px}
+.cv b{font-weight:500}
+.cv .dim{color:var(--muted)}
+.cv ul{margin:8px 0 0;padding-left:18px;display:grid;gap:4px}
+.cv .proj{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:12px 0 0}
+.cv .proj dt{font-style:italic}
+.cv .proj dd{margin:0;color:var(--muted)}
+@media (max-width:520px){.cv .row{grid-template-columns:1fr;gap:4px}.cv .proj{grid-template-columns:1fr}.cv .proj dd{margin-bottom:6px}}
+
+.lb{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.92);display:grid;place-items:center;padding:24px}
+.lb[hidden]{display:none}
+.lb-in{width:min(1200px,100%);display:grid;gap:12px}
+.lb-top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.lb-top button{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(243,239,232,.35);border-radius:999px;padding:8px 14px;cursor:pointer}
+.lb video{width:100%;max-height:80vh;background:#000;display:block}
+.lb video[hidden],.lb-photo[hidden]{display:none}
+.lb-photo{position:relative;display:grid;place-items:center}
+.lb-photo img{max-width:100%;max-height:80vh;display:block;user-select:none}
+.lb-photo .nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(243,239,232,.35);background:rgba(0,0,0,.4);color:var(--ink);font:28px/1 var(--display);cursor:pointer;display:grid;place-items:center}
+.lb-photo .nav:hover{border-color:var(--ink)}
+.lb-photo.single .nav{display:none}
+.lb-photo .prev{left:12px}.lb-photo .next{right:12px}
+footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:120px 0 40px}
+footer .links{display:flex;gap:28px;flex-wrap:wrap}
+footer a:hover{color:var(--muted)}
+
+@media (max-width:700px){
+  .about{grid-template-columns:1fr}
+  .grid{gap:10vh}
+  header nav{gap:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a href="#top">Gili Sassoon</a>
+    <nav aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#cv">CV</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="hero">
+      <h1>Gili Sassoon</h1>
+      <p>Multimedia artist / video editor / motion designer</p>
+    </div>
+
+    <div class="pulse">
+      <div class="frame"><img src="assets/frame-outline.png" alt=""><canvas id="ecg" aria-hidden="true"></canvas></div>
+      <button class="tap" id="tap" type="button" aria-label="Tap four times to set the heartbeat tempo"><i></i><span class="mono" id="bpm">tap</span></button>
+    </div>
+
+
+    <section id="work">
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section id="about">
+      <div class="about">
+        <span class="mono">About</span>
+        <p>I make moving image for screens and spaces: motion design, editing and interactive installations. Film in Berlin, now at Bezalel.</p>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="about">
+        <span class="mono">Skills</span>
+        <ul class="skills">
+          <li>Video editing</li>
+          <li>Sound design</li>
+          <li>Motion design</li>
+          <li>Photography</li>
+          <li>Illustration</li>
+          <li>Interactive installation</li>
+          <li class="gap">Adobe After Effects</li>
+          <li>Adobe Premiere Pro</li>
+          <li>Adobe Photoshop</li>
+          <li>TouchDesigner</li>
+          <li>Blender</li>
+          <li>DaVinci Resolve</li>
+          <li>Ableton Live</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <section id="cv" class="cvpage" aria-label="CV">
+    <div class="about">
+      <div class="cvhead"><h2>CV</h2><a class="mono back" href="#top">← Back to work</a></div>
+      <div class="cv">
+        <p>Multimedia artist and creator, 25, specializing in motion design, video production, 3D animation and interactive audio-visual experiences. I combine technical execution with strong environmental and emotional storytelling, and I'm looking to bring my creativity, art background and technical skills to a motion designer position.</p>
+
+        <h3 class="mono">Experience</h3>
+        <div class="row">
+          <span class="mono yr">2026</span>
+          <div>
+            <b>Mayven</b> <span class="dim">Motion design and video editing for social media, freelance</span>
+          </div>
+        </div>
+        <div class="row">
+          <span class="mono yr">2024 – 2026</span>
+          <div>
+            <b>Multimedia Artist &amp; Motion Designer</b> <span class="dim">Freelance / independent projects</span>
+            <ul>
+              <li>Design and animation: complex visual projects and 3D animation in After Effects and Blender.</li>
+              <li>Production, directing and editing: led end-to-end video production, from filming and directing to editing.</li>
+              <li>Interactive experiences and sound: designed and set up art installations combining sound design (Ableton Live) and interactive visuals (TouchDesigner).</li>
+              <li>Video documentation for dance performances and movement-based projects.</li>
+            </ul>
+            <dl class="proj">
+              <dt>Blessings</dt><dd>Directed and edited a short documentary about a visual artist based in Berlin.</dd>
+              <dt>Into Your Heart</dt><dd>Designed and built an immersive art installation.</dd>
+              <dt>The Fool</dt><dd>Documented and created content for an interactive theater project.</dd>
+              <dt>Dynamic Connectivity</dt><dd>Documented and created content for a dance performance.</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="row">
+          <span class="mono yr">2020 – 2022</span>
+          <div>
+            <b>Team Commander</b> <span class="dim">"Dog Center" Unit, Israeli Air Force</span>
+            <ul>
+              <li>Commanded, managed and led soldiers in a dynamic, operational and demanding environment.</li>
+              <li>Responsible for meeting targets, managing tasks and supporting the personal and professional development of team members.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="mono">Education</h3>
+        <div class="row">
+          <span class="mono yr">2026 –</span>
+          <div><b>Art and Design (BA)</b> <span class="dim">Bezalel Academy of Arts and Design</span></div>
+        </div>
+        <div class="row">
+          <span class="mono yr">Berlin</span>
+          <div><b>Film and Motion Design</b> <span class="dim">University of Europe for Applied Sciences, 3 semesters completed</span></div>
+        </div>
+
+        <h3 class="mono">Contact</h3>
+        <p>+972-54-4892777<br>gili1307@gmail.com</p>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <a href="mailto:gili1307@gmail.com">gili1307@gmail.com</a>
+    <div class="links">
+      <a href="#contact">LinkedIn</a>
+      <a href="#contact">Vimeo</a>
+      <a href="#cv">CV</a>
+    </div>
+  </footer>
+
+</div>
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbt">
+  <div class="lb-in">
+    <div class="lb-top"><span class="mono" id="lbt"></span><button type="button" id="lbclose">Close</button></div>
+    <video id="lbv" controls playsinline></video>
+    <div class="lb-photo" id="lbp" hidden>
+      <img id="lbimg" alt="">
+      <button type="button" class="nav prev" id="lbprev" aria-label="Previous photo">‹</button>
+      <button type="button" class="nav next" id="lbnext" aria-label="Next photo">›</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ===== YOUR WORK: edit this list to add, remove or reorder projects =====
+   title  : project name
+   type   : one or two words shown on the right
+   image  : still or GIF file, e.g. "work/pulse.jpg"
+   video  : optional short muted loop (.mp4), plays on hover
+   full   : optional full video with sound (.mp4), opens in a player on click
+   photos : optional list of images, opens as a slideshow on click
+   link   : optional, where a click goes if there is no full video             */
+const PROJECTS = [
+  { title:"Heaven Scent",  type:"Music video edit", image:"work/heavenscent.jpg", video:"work/heavenscent-preview.mp4", full:"work/heavenscent.mp4" },
+  { title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
+    photos:["work/photo-1.jpg","work/photo-2.jpg","work/photo-3.jpg","work/photo-4.jpg"] },
+  { title:"Lone & Untamed", type:"Photography", image:"work/photo-8.jpg",
+    photos:["work/photo-5.jpg","work/photo-6.jpg","work/photo-7.jpg","work/photo-8.jpg","work/photo-9.jpg"] },
+  { title:"Unshot",        type:"Digital illustration", image:"work/unshot.jpg", photos:["work/unshot.jpg"] },
+  { title:"Innocence",     type:"3D sculpt", image:"work/innocence-cover.png", fit:"contain",
+    photos:["work/innocence-cover.png","work/innocence-1.png","work/innocence-2.png","work/innocence-3.png"] },
+  { title:"Pulse",         type:"Installation",   image:"", video:"", link:"" },
+  { title:"Project title", type:"Product launch", image:"", video:"", link:"" },
+  { title:"Project title", type:"UI motion",      image:"", video:"", link:"" },
+  { title:"Project title", type:"Social",         image:"", video:"", link:"" },
+  { title:"Project title", type:"Brand",          image:"", video:"", link:"" },
+];
+/* ======================================================================== */
+
+// Full-screen player for projects with a full video
+const lb=document.getElementById('lb'),lbv=document.getElementById('lbv'),lbt=document.getElementById('lbt');
+const lbp=document.getElementById('lbp'),lbimg=document.getElementById('lbimg');
+let slides=null,si=0,slideTitle='';
+function showSlide(i){
+  si=(i+slides.length)%slides.length;
+  lbimg.src=slides[si];lbimg.alt=slideTitle+' '+(si+1);
+  lbt.textContent=slides.length>1?slideTitle+' · '+(si+1)+' / '+slides.length:slideTitle;
+  lbp.classList.toggle('single',slides.length<2);
+}
+function openPlayer(p){
+  if(p.photos){
+    slides=p.photos;slideTitle=p.title;lbv.hidden=true;lbp.hidden=false;showSlide(0);
+    slides.forEach(src=>{const i=new Image();i.src=src});
+  }else{
+    slides=null;lbp.hidden=true;lbv.hidden=false;
+    lbt.textContent=p.title+' · '+p.type;
+    lbv.src=p.full;lbv.poster=p.image||'';lbv.play().catch(()=>{});
+  }
+  lb.hidden=false;document.body.style.overflow='hidden';
+  document.getElementById('lbclose').focus();
+}
+function closePlayer(){
+  if(!lbv.hidden){lbv.pause();lbv.removeAttribute('src');lbv.load()}
+  slides=null;lb.hidden=true;document.body.style.overflow='';
+}
+document.getElementById('lbprev').addEventListener('click',()=>showSlide(si-1));
+document.getElementById('lbnext').addEventListener('click',()=>showSlide(si+1));
+lbimg.addEventListener('click',()=>showSlide(si+1));
+let tx=null;
+lbp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+lbp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)showSlide(si+(dx<0?1:-1));tx=null});
+document.getElementById('lbclose').addEventListener('click',closePlayer);
+lb.addEventListener('click',e=>{if(e.target===lb)closePlayer()});
+addEventListener('keydown',e=>{
+  if(lb.hidden)return;
+  if(e.key==='Escape')closePlayer();
+  if(slides&&e.key==='ArrowRight')showSlide(si+1);
+  if(slides&&e.key==='ArrowLeft')showSlide(si-1);
+});
+
+(function(){
+  const grid=document.getElementById('grid');
+  PROJECTS.forEach(p=>{
+    const a=document.createElement('a');
+    a.className='item';a.href=p.link||'#work';
+    if(p.link&&!p.full&&!p.photos){a.target='_blank';a.rel='noopener'}
+    if(p.full||p.photos)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
+    const box=document.createElement('div');box.className='img';
+    if(p.photos){
+      // photo projects: show every photo in turn, one every 3 seconds
+      box.classList.add('slides');if(p.fit==='contain')box.classList.add('float');
+      const imgs=p.photos.map((src,k)=>{const im=document.createElement('img');im.src=src;im.alt=p.title+' '+(k+1);im.loading=k?'lazy':'eager';if(!k)im.classList.add('on');
+        // vertical photos are shown whole, horizontal ones fill the frame
+        const fit=()=>{if(im.naturalWidth/im.naturalHeight<1.3)im.classList.add('tall')};
+        im.complete?fit():im.addEventListener('load',fit);box.appendChild(im);return im});
+      if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&imgs.length>1){
+        let k=0;setInterval(()=>{imgs[k].classList.remove('on');k=(k+1)%imgs.length;imgs[k].classList.add('on')},3000);
+      }
+    }else if(p.image){const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
+    if(p.video){
+      const v=document.createElement('video');v.src=p.video;v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
+      if(p.image){v.poster=p.image;box.innerHTML=''}
+      box.appendChild(v);
+      a.addEventListener('mouseenter',()=>v.play().catch(()=>{}));
+      a.addEventListener('mouseleave',()=>{v.pause();v.currentTime=0});
+    }
+    const cap=document.createElement('div');cap.className='cap';
+    cap.innerHTML='<span></span><span class="mono"></span>';
+    cap.children[0].textContent=p.title;cap.children[1].textContent=p.type;
+    a.append(box,cap);grid.appendChild(a);
+  });
+})();
+
+// CV lives on its own page, shown when the address ends in #cv
+function route(){
+  const onCv=location.hash==='#cv';
+  const was=document.body.classList.contains('on-cv');
+  document.body.classList.toggle('on-cv',onCv);
+  if(onCv){scrollTo(0,0)}
+  else if(was){const t=location.hash&&document.querySelector(location.hash);t&&t.id!=='top'?t.scrollIntoView():scrollTo(0,0)}
+}
+addEventListener('hashchange',route);route();
+addEventListener('load',()=>{if(location.hash==='#cv')setTimeout(()=>scrollTo(0,0),0)});
+
+(function(){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const c=document.getElementById('ecg'),ctx=c.getContext('2d');
+  const tapBtn=document.getElementById('tap'),bpmEl=document.getElementById('bpm');
+  const g=(x,s)=>Math.exp(-(x*x)/(2*s*s));
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const ink=getComputedStyle(document.documentElement).getPropertyValue('--pulse').trim();
+  let w,h;
+  function size(){const d=Math.min(devicePixelRatio||1,2);w=c.clientWidth;h=c.clientHeight;c.width=w*d;c.height=h*d;ctx.setTransform(d,0,0,d,0,0)}
+  size();addEventListener('resize',size);
+  if(window.ResizeObserver)new ResizeObserver(size).observe(c);
+
+  const speed=150;            // px per second
+  let base=64, hover=0, cur=64;
+  let beats=[];               // each beat has its own time and shape
+
+  // One beat, shaped in seconds around the R peak, so it stays the same width at any tempo
+  function shape(b,dt){
+    return b.p*g(dt+b.pr,.022)
+         - b.q*g(dt+.028,.009)
+         + b.r*g(dt,.011+b.wid)
+         - b.s*g(dt-.03,.011)
+         + b.tt*g(dt-b.st,.045+b.tw);
+  }
+  function newBeat(t){
+    return {t, r:rnd(.78,1.05), wid:rnd(0,.004), p:rnd(.06,.12), pr:rnd(.15,.19),
+            q:rnd(.06,.14), s:rnd(.14,.3), tt:rnd(.14,.28), st:rnd(.22,.3), tw:rnd(-.008,.015)};
+  }
+  function fill(now){
+    const from=now-(w/speed)-1;
+    beats=beats.filter(b=>b.t>from);
+    if(!beats.length){let t=from;while(t<now+1){beats.push(newBeat(t));t+=60/cur}}
+    let last=beats[beats.length-1];
+    while(last.t<now+1){
+      const gap=(60/cur)*(1+rnd(-.05,.05));   // small natural variation between beats
+      last=newBeat(last.t+gap);beats.push(last);
+    }
+  }
+  function signal(t){
+    let v=.025*Math.sin(t*.7)+.012*Math.sin(t*2.3);  // slow breathing drift
+    for(const b of beats){const dt=t-b.t;if(dt>-.3&&dt<.5)v+=shape(b,dt)}
+    return v;
+  }
+
+  let flashUntil=0,lastSeen=0;
+  function draw(time){
+    // re-measure if the frame changed size (or was hidden when the page loaded)
+    if(c.clientWidth!==w||c.clientHeight!==h)size();
+    if(!w||!h){if(!reduce)requestAnimationFrame(draw);return}
+    const now=time/1000;
+    cur+=((base+hover)-cur)*.03;
+    fill(now);
+    ctx.clearRect(0,0,w,h);
+    const grad=ctx.createLinearGradient(0,0,w,0);
+    grad.addColorStop(0,'rgba(243,239,232,0)');grad.addColorStop(.15,ink);grad.addColorStop(.85,ink);grad.addColorStop(1,'rgba(243,239,232,0)');
+    ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=1){
+      const y=h*.66-signal(now-(w-x)/speed)*h*.55;
+      x?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+    // the dot blinks as each beat reaches it
+    const hit=beats.find(b=>b.t<=now&&b.t>lastSeen);
+    if(hit){lastSeen=hit.t;flashUntil=now+.12}
+    if(!tapping) tapBtn.classList.toggle('on',now<flashUntil);
+    if(!reduce)requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  // Hovering the work raises the pulse a little
+  document.querySelectorAll('.item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{hover=18});
+    el.addEventListener('mouseleave',()=>{hover=0});
+  });
+
+  // Tap four times to set the tempo
+  let taps=[],tapping=false;
+  tapBtn.addEventListener('click',()=>{
+    const t=performance.now();
+    if(taps.length&&t-taps[taps.length-1]>2000)taps=[];
+    taps.push(t);
+    tapping=true;tapBtn.classList.add('on');setTimeout(()=>{tapping=false;tapBtn.classList.remove('on')},90);
+    if(taps.length<4){bpmEl.textContent='•'.repeat(taps.length);return}
+    const iv=(taps[3]-taps[0])/3;
+    base=Math.max(40,Math.min(180,Math.round(60000/iv)));
+    bpmEl.textContent=base;
+    taps=[];
+  });
+  if(reduce)bpmEl.textContent=base;
+})();
+</script>
+</body>
+</html>
