@@ -294,7 +294,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
    full   : optional full video with sound (.mp4), opens in a player on click
    photos : optional list of images, opens as a slideshow on click
    reels  : optional list of short vertical videos {name, loop, full, poster}
-   media  : optional mix of {img} and silent looping {video}, opens as a slideshow
+   media  : optional mix of {img} and silent looping {video} (add full:"..." for a version with sound), opens as a slideshow
    sound  : optional audio track with a small play/stop button
    row    : with media, show every item side by side (ar = width / height)
    link   : optional, where a click goes if there is no full video             */
@@ -307,6 +307,10 @@ const PROJECTS = [
       { name:"Scan Grid", loop:"work/mayven-5-loop.mp4", full:"work/mayven-5.mp4", poster:"work/mayven-5.jpg" }
     ] },
   { page:"work", title:"Heaven Scent",  type:"Music video edit", image:"work/heavenscent.jpg", video:"work/heavenscent-preview.mp4", full:"work/heavenscent.mp4" },
+  { page:"work", title:"Dynamic Connectivity", type:"Dance documentation · choreography by Shira Shiryan", row:true,
+    media:[ {video:"work/dance-1-loop.mp4", full:"work/dance-1.mp4", poster:"work/dance-1.jpg", ar:1.778},
+            {video:"work/dance-2-loop.mp4", full:"work/dance-2.mp4", poster:"work/dance-2.jpg", ar:1.778},
+            {video:"work/dance-3-loop.mp4", full:"work/dance-3.mp4", poster:"work/dance-3.jpg", ar:0.5625} ] },
   { page:"art", title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
     photos:["work/photo-1.jpg","work/photo-2.jpg","work/photo-3.jpg","work/photo-4.jpg"] },
   { page:"art", title:"Lone & Untamed", type:"Photography", image:"work/photo-8.jpg",
@@ -360,7 +364,7 @@ function showSlide(i){
 function openPlayer(p,start){
   slideTitle=p.title;
   if(p.photos){slides=p.photos.map(src=>({img:src}));p.photos.forEach(src=>{const i=new Image();i.src=src})}
-  else if(p.media){slides=p.media.map(m=>m.video?{video:m.video,loop:true}:{img:m.img})}
+  else if(p.media){slides=p.media.map(m=>m.full?{video:m.full,poster:m.poster}:m.video?{video:m.video,loop:true}:{img:m.img})}
   else if(p.reels){slides=p.reels.map(r=>({video:r.full,poster:r.poster,name:r.name}))}
   else{slides=[{video:p.full,poster:p.image,name:p.type}]}
   showSlide(start||0);
@@ -390,7 +394,7 @@ addEventListener('keydown',e=>{
 (function(){
   PROJECTS.forEach(p=>{
     // projects without any image or video yet stay hidden until media is added
-    if(!p.image&&!p.video&&!p.photos&&!p.reels)return;
+    if(!p.image&&!p.video&&!p.photos&&!p.reels&&!p.media)return;
     const grid=document.getElementById(p.page==='art'?'grid-art':'grid-work');
     const a=document.createElement('a');
     a.className='item';a.href=p.link||'#work';
@@ -403,7 +407,7 @@ addEventListener('keydown',e=>{
       box.classList.add('row');
       p.media.forEach((m,k)=>{
         let el;
-        if(m.video){el=document.createElement('video');el.src=m.video;el.muted=true;el.loop=true;el.playsInline=true;el.autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches;el.preload='metadata'}
+        if(m.video){el=document.createElement('video');el.src=m.video;if(m.poster)el.poster=m.poster;el.muted=true;el.loop=true;el.playsInline=true;el.autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches;el.preload='metadata'}
         else{el=document.createElement('img');el.src=m.img;el.alt=p.title;el.loading='lazy'}
         el.style.flex=m.ar+' 1 0';el.style.aspectRatio=String(m.ar);
         el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPlayer(p,k)});
