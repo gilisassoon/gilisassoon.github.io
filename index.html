@@ -56,7 +56,7 @@ header a:hover{color:var(--muted)}
 
 section{padding:96px 0 0}
 
-.grid{display:grid;grid-template-columns:1fr;gap:18vh}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18vh}
 .item{display:block}
 .item .img{position:relative;aspect-ratio:16/9;max-height:78vh;width:100%;background:var(--fill);overflow:hidden;transition:opacity .3s}
 .item .img img,.item .img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
@@ -69,6 +69,12 @@ section{padding:96px 0 0}
 .item .img.float img,.item .img.float video{object-fit:contain}
 .cap .snd{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(243,239,232,.35);border-radius:999px;padding:5px 11px;margin-left:12px;cursor:pointer;vertical-align:2px}
 .cap .snd:hover,.cap .snd[aria-pressed="true"]{border-color:var(--ink)}
+/* side-by-side media row */
+.item .img.row{aspect-ratio:auto;max-height:none;background:none;display:flex;gap:12px;align-items:flex-start;overflow:visible}
+.item .img.row:hover{opacity:1}
+.item .img.row img,.item .img.row video{position:static;min-width:0;width:0;height:auto;object-fit:cover;cursor:pointer;transition:opacity .3s}
+.item .img.row img:hover,.item .img.row video:hover{opacity:.8}
+@media (max-width:700px){.item .img.row{flex-wrap:wrap;gap:8px}.item .img.row>*{flex:1 1 calc(50% - 4px)!important}}
 /* a row of vertical social videos */
 .item .img.reels{aspect-ratio:auto;max-height:none;background:none;display:flex;gap:12px;justify-content:center;overflow:visible}
 .item .img.reels:hover{opacity:1}
@@ -290,6 +296,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
    reels  : optional list of short vertical videos {name, loop, full, poster}
    media  : optional mix of {img} and silent looping {video}, opens as a slideshow
    sound  : optional audio track with a small play/stop button
+   row    : with media, show every item side by side (ar = width / height)
    link   : optional, where a click goes if there is no full video             */
 const PROJECTS = [
   { page:"work", title:"Mayven", type:"Motion design for social", reels:[
@@ -309,7 +316,8 @@ const PROJECTS = [
     photos:["work/innocence-cover.png","work/innocence-1.png","work/innocence-2.png","work/innocence-3.png"] },
   { page:"art", title:"Into Your Heart", type:"Immersive installation", fit:"contain",
     image:"work/heart-photo.jpg", video:"work/heart-2.mp4", sound:"work/heart-sound.m4a",
-    media:[ {img:"work/heart-photo.jpg"}, {video:"work/heart-1.mp4"}, {video:"work/heart-2.mp4"}, {video:"work/heart-3.mp4"} ] },
+    row:true,
+    media:[ {img:"work/heart-photo.jpg", ar:0.8}, {video:"work/heart-1.mp4", ar:1.646}, {video:"work/heart-2.mp4", ar:0.5625}, {video:"work/heart-3.mp4", ar:0.5625} ] },
   { page:"art", title:"Jump Into the Void", type:"Four-screen animation", image:"work/void.jpg", video:"work/void-preview.mp4", full:"work/void.mp4" },
   { page:"work", title:"Project title", type:"Product launch", image:"", video:"", link:"" },
   { page:"work", title:"Project title", type:"UI motion",      image:"", video:"", link:"" },
@@ -390,7 +398,18 @@ addEventListener('keydown',e=>{
     if((p.full||p.photos||p.media)&&!p.reels)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
     if(p.reels)a.addEventListener('click',e=>e.preventDefault());
     const box=document.createElement('div');box.className='img';
-    if(p.reels){
+    if(p.media&&p.row){
+      // everything side by side at the same height; click any item to open it large
+      box.classList.add('row');
+      p.media.forEach((m,k)=>{
+        let el;
+        if(m.video){el=document.createElement('video');el.src=m.video;el.muted=true;el.loop=true;el.playsInline=true;el.autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches;el.preload='metadata'}
+        else{el=document.createElement('img');el.src=m.img;el.alt=p.title;el.loading='lazy'}
+        el.style.flex=m.ar+' 1 0';el.style.aspectRatio=String(m.ar);
+        el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPlayer(p,k)});
+        box.appendChild(el);
+      });
+    }else if(p.reels){
       // a row of short vertical videos, all playing silently; click one to watch it with sound
       box.classList.add('reels');
       p.reels.forEach((r,k)=>{
@@ -410,8 +429,8 @@ addEventListener('keydown',e=>{
       if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&imgs.length>1){
         let k=0;setInterval(()=>{imgs[k].classList.remove('on');k=(k+1)%imgs.length;imgs[k].classList.add('on')},3000);
       }
-    }else if(p.image){if(p.fit==='contain')box.classList.add('float');const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
-    if(p.video){
+    }else if(p.image&&!p.row){if(p.fit==='contain')box.classList.add('float');const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
+    if(p.video&&!p.row){
       const v=document.createElement('video');v.src=p.video;v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
       if(p.image){v.poster=p.image;box.innerHTML=''}
       box.appendChild(v);
