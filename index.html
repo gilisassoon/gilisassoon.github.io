@@ -22,7 +22,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-snap-type:y proximity;background:var(--sand)}
+html{scroll-behavior:smooth;background:var(--sand)}
 body{
   margin:0;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
   background:transparent;
@@ -54,7 +54,7 @@ header a:hover{color:var(--muted)}
 section{padding:96px 0 0}
 
 .grid{display:grid;grid-template-columns:1fr;gap:18vh}
-.item{display:block;scroll-snap-align:center}
+.item{display:block}
 .item .img{position:relative;aspect-ratio:16/9;max-height:78vh;width:100%;background:var(--fill);overflow:hidden;transition:opacity .3s}
 .item .img img,.item .img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .item .img.slides{aspect-ratio:3/2;background:none}
@@ -69,9 +69,15 @@ section{padding:96px 0 0}
 #skills{padding-top:56px}
 .skills{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .skills .gap{margin-top:18px}
-#cv{padding-top:6vh}
-body:not(.on-cv) #cv{display:none}
-body.on-cv main{display:none}
+/* pages */
+.page{display:none;padding-top:6vh}
+body[data-page="home"] .home,body[data-page="work"] #work,body[data-page="art"] #art,body[data-page="cv"] #cv{display:block}
+body:not([data-page="home"]) .home{display:none}
+.home{min-height:calc(100vh - 260px);display:grid;place-content:center}
+.home .hero{padding:0}
+.pagehead{text-align:center;margin-bottom:8vh}
+.pagehead h2,.cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
+header nav a.on{color:var(--muted)}
 .cvhead{display:grid;gap:14px;align-content:start}
 .cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
 .cvhead .back:hover{color:var(--ink)}
@@ -123,63 +129,33 @@ footer a:hover{color:var(--muted)}
 
   <header>
     <a href="#top">Gili Sassoon</a>
-    <nav aria-label="Sections">
+    <nav aria-label="Pages">
       <a href="#work">Work</a>
-      <a href="#about">About</a>
+      <a href="#art">Art</a>
       <a href="#cv">CV</a>
-      <a href="#contact">Contact</a>
     </nav>
   </header>
 
-  <main id="top">
+  <main id="top" class="home">
     <div class="hero">
       <h1>Gili Sassoon</h1>
       <p>Multimedia artist / video editor / motion designer</p>
     </div>
-
-    <div class="pulse">
-      <div class="frame"><img src="assets/frame-outline.png" alt=""><canvas id="ecg" aria-hidden="true"></canvas></div>
-      <button class="tap" id="tap" type="button" aria-label="Tap four times to set the heartbeat tempo"><i></i><span class="mono" id="bpm">tap</span></button>
-    </div>
-
-
-    <section id="work">
-      <div class="grid" id="grid"></div>
-    </section>
-
-    <section id="about">
-      <div class="about">
-        <span class="mono">About</span>
-        <p>I make moving image for screens and spaces: motion design, editing and interactive installations. Film in Berlin, now at Bezalel.</p>
-      </div>
-    </section>
-
-    <section id="skills">
-      <div class="about">
-        <span class="mono">Skills</span>
-        <ul class="skills">
-          <li>Video editing</li>
-          <li>Sound design</li>
-          <li>Motion design</li>
-          <li>Photography</li>
-          <li>Illustration</li>
-          <li>Interactive installation</li>
-          <li class="gap">Adobe After Effects</li>
-          <li>Adobe Premiere Pro</li>
-          <li>Adobe Photoshop</li>
-          <li>TouchDesigner</li>
-          <li>Blender</li>
-          <li>DaVinci Resolve</li>
-          <li>Ableton Live</li>
-        </ul>
-      </div>
-    </section>
-
   </main>
 
-  <section id="cv" class="cvpage" aria-label="CV">
+  <section id="work" class="page" aria-label="Work">
+    <div class="pagehead"><h2>Work</h2></div>
+    <div class="grid" id="grid-work"></div>
+  </section>
+
+  <section id="art" class="page" aria-label="Art">
+    <div class="pagehead"><h2>Art</h2></div>
+    <div class="grid" id="grid-art"></div>
+  </section>
+
+  <section id="cv" class="page cvpage" aria-label="CV">
     <div class="about">
-      <div class="cvhead"><h2>CV</h2><a class="mono back" href="#top">← Back to work</a></div>
+      <div class="cvhead"><h2>CV</h2></div>
       <div class="cv">
         <p>Multimedia artist and creator, 25, specializing in motion design, video production, 3D animation and interactive audio-visual experiences. I combine technical execution with strong environmental and emotional storytelling, and I'm looking to bring my creativity, art background and technical skills to a motion designer position.</p>
 
@@ -229,6 +205,23 @@ footer a:hover{color:var(--muted)}
           <div><b>Film and Motion Design</b> <span class="dim">University of Europe for Applied Sciences, 3 semesters completed</span></div>
         </div>
 
+        <h3 class="mono">Skills</h3>
+        <ul class="skills">
+          <li>Video editing</li>
+          <li>Sound design</li>
+          <li>Motion design</li>
+          <li>Photography</li>
+          <li>Illustration</li>
+          <li>Interactive installation</li>
+          <li class="gap">Adobe After Effects</li>
+          <li>Adobe Premiere Pro</li>
+          <li>Adobe Photoshop</li>
+          <li>TouchDesigner</li>
+          <li>Blender</li>
+          <li>DaVinci Resolve</li>
+          <li>Ableton Live</li>
+        </ul>
+
         <h3 class="mono">Contact</h3>
         <p>+972-54-4892777<br>gili1307@gmail.com</p>
       </div>
@@ -258,6 +251,7 @@ footer a:hover{color:var(--muted)}
 </div>
 <script>
 /* ===== YOUR WORK: edit this list to add, remove or reorder projects =====
+   page   : "work" or "art" (which page it appears on)
    title  : project name
    type   : one or two words shown on the right
    image  : still or GIF file, e.g. "work/pulse.jpg"
@@ -266,19 +260,19 @@ footer a:hover{color:var(--muted)}
    photos : optional list of images, opens as a slideshow on click
    link   : optional, where a click goes if there is no full video             */
 const PROJECTS = [
-  { title:"Heaven Scent",  type:"Music video edit", image:"work/heavenscent.jpg", video:"work/heavenscent-preview.mp4", full:"work/heavenscent.mp4" },
-  { title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
+  { page:"work", title:"Heaven Scent",  type:"Music video edit", image:"work/heavenscent.jpg", video:"work/heavenscent-preview.mp4", full:"work/heavenscent.mp4" },
+  { page:"art", title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
     photos:["work/photo-1.jpg","work/photo-2.jpg","work/photo-3.jpg","work/photo-4.jpg"] },
-  { title:"Lone & Untamed", type:"Photography", image:"work/photo-8.jpg",
+  { page:"art", title:"Lone & Untamed", type:"Photography", image:"work/photo-8.jpg",
     photos:["work/photo-5.jpg","work/photo-6.jpg","work/photo-7.jpg","work/photo-8.jpg","work/photo-9.jpg"] },
-  { title:"Unshot",        type:"Digital illustration", image:"work/unshot.jpg", photos:["work/unshot.jpg"] },
-  { title:"Innocence",     type:"3D sculpt", image:"work/innocence-cover.png", fit:"contain",
+  { page:"art", title:"Unshot",        type:"Digital illustration", image:"work/unshot.jpg", photos:["work/unshot.jpg"] },
+  { page:"art", title:"Innocence",     type:"3D sculpt", image:"work/innocence-cover.png", fit:"contain",
     photos:["work/innocence-cover.png","work/innocence-1.png","work/innocence-2.png","work/innocence-3.png"] },
-  { title:"Pulse",         type:"Installation",   image:"", video:"", link:"" },
-  { title:"Project title", type:"Product launch", image:"", video:"", link:"" },
-  { title:"Project title", type:"UI motion",      image:"", video:"", link:"" },
-  { title:"Project title", type:"Social",         image:"", video:"", link:"" },
-  { title:"Project title", type:"Brand",          image:"", video:"", link:"" },
+  { page:"art", title:"Pulse",         type:"Installation",   image:"", video:"", link:"" },
+  { page:"work", title:"Project title", type:"Product launch", image:"", video:"", link:"" },
+  { page:"work", title:"Project title", type:"UI motion",      image:"", video:"", link:"" },
+  { page:"work", title:"Project title", type:"Social",         image:"", video:"", link:"" },
+  { page:"work", title:"Project title", type:"Brand",          image:"", video:"", link:"" },
 ];
 /* ======================================================================== */
 
@@ -324,8 +318,10 @@ addEventListener('keydown',e=>{
 });
 
 (function(){
-  const grid=document.getElementById('grid');
   PROJECTS.forEach(p=>{
+    // projects without any image or video yet stay hidden until media is added
+    if(!p.image&&!p.video&&!p.photos)return;
+    const grid=document.getElementById(p.page==='art'?'grid-art':'grid-work');
     const a=document.createElement('a');
     a.className='item';a.href=p.link||'#work';
     if(p.link&&!p.full&&!p.photos){a.target='_blank';a.rel='noopener'}
@@ -356,20 +352,22 @@ addEventListener('keydown',e=>{
   });
 })();
 
-// CV lives on its own page, shown when the address ends in #cv
+// Four pages: home (name), work, art, cv. The address hash picks the page.
+const PAGES=['work','art','cv'];
 function route(){
-  const onCv=location.hash==='#cv';
-  const was=document.body.classList.contains('on-cv');
-  document.body.classList.toggle('on-cv',onCv);
-  if(onCv){scrollTo(0,0)}
-  else if(was){const t=location.hash&&document.querySelector(location.hash);t&&t.id!=='top'?t.scrollIntoView():scrollTo(0,0)}
+  const h=location.hash.slice(1);
+  const page=PAGES.includes(h)?h:'home';
+  document.body.dataset.page=page;
+  document.querySelectorAll('header nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+page));
+  // the browser jumps to the section after the hash changes; bring every page back to its top
+  scrollTo(0,0);requestAnimationFrame(()=>scrollTo(0,0));setTimeout(()=>scrollTo(0,0),60);
 }
 addEventListener('hashchange',route);route();
-addEventListener('load',()=>{if(location.hash==='#cv')setTimeout(()=>scrollTo(0,0),0)});
+addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
 
 (function(){
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const c=document.getElementById('ecg'),ctx=c.getContext('2d');
+  const c=document.getElementById('ecg');if(!c)return;const ctx=c.getContext('2d');
   const tapBtn=document.getElementById('tap'),bpmEl=document.getElementById('bpm');
   const g=(x,s)=>Math.exp(-(x*x)/(2*s*s));
   const rnd=(a,b)=>a+Math.random()*(b-a);
