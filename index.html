@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0d08">
+<meta name="theme-color" content="#141a05">
 <title>Gili Sassoon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;background:#0a0d08}
+/* Safari colours its own top/bottom bars from the page: match the photo's edges */
+html{scroll-behavior:smooth;background:#101106 linear-gradient(#141a05,#101106) fixed;min-height:100%}
 body{
   margin:0;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
   background:transparent;
