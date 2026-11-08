@@ -65,6 +65,10 @@ section{padding:96px 0 0}
 .item .img.slides.float img,.item .img.slides img.tall{object-fit:contain}
 .item .img.slides img.on{opacity:1}
 .item:hover .img{opacity:.85}
+.item .img.float{background:none}
+.item .img.float img,.item .img.float video{object-fit:contain}
+.cap .snd{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(243,239,232,.35);border-radius:999px;padding:5px 11px;margin-left:12px;cursor:pointer;vertical-align:2px}
+.cap .snd:hover,.cap .snd[aria-pressed="true"]{border-color:var(--ink)}
 /* a row of vertical social videos */
 .item .img.reels{aspect-ratio:auto;max-height:none;background:none;display:flex;gap:12px;justify-content:center;overflow:visible}
 .item .img.reels:hover{opacity:1}
@@ -117,6 +121,7 @@ body[data-page="contact"] footer{visibility:hidden}
 .lb[hidden]{display:none}
 .lb-in{width:min(1200px,100%);display:grid;gap:12px}
 .lb-top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.lb-btns{display:flex;gap:8px}
 .lb-top button{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(243,239,232,.35);border-radius:999px;padding:8px 14px;cursor:pointer}
 .lb video{max-width:100%;max-height:80vh;background:#000;display:block}
 .lb video[hidden],.lb img[hidden]{display:none}
@@ -264,7 +269,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
 </div>
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbt">
   <div class="lb-in">
-    <div class="lb-top"><span class="mono" id="lbt"></span><button type="button" id="lbclose">Close</button></div>
+    <div class="lb-top"><span class="mono" id="lbt"></span><span class="lb-btns"><button type="button" class="snd" id="lbsnd" hidden>Sound off</button><button type="button" id="lbclose">Close</button></span></div>
     <div class="lb-photo" id="lbp">
       <video id="lbv" controls playsinline hidden></video>
       <img id="lbimg" alt="" hidden>
@@ -283,6 +288,8 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
    full   : optional full video with sound (.mp4), opens in a player on click
    photos : optional list of images, opens as a slideshow on click
    reels  : optional list of short vertical videos {name, loop, full, poster}
+   media  : optional mix of {img} and silent looping {video}, opens as a slideshow
+   sound  : optional audio track with a small play/stop button
    link   : optional, where a click goes if there is no full video             */
 const PROJECTS = [
   { page:"work", title:"Mayven", type:"Motion design for social", reels:[
@@ -300,14 +307,29 @@ const PROJECTS = [
   { page:"art", title:"Unshot",        type:"Digital illustration", image:"work/unshot.jpg", photos:["work/unshot.jpg"] },
   { page:"art", title:"Innocence",     type:"3D sculpt", image:"work/innocence-cover.png", fit:"contain",
     photos:["work/innocence-cover.png","work/innocence-1.png","work/innocence-2.png","work/innocence-3.png"] },
+  { page:"art", title:"Into Your Heart", type:"Immersive installation", fit:"contain",
+    image:"work/heart-photo.jpg", video:"work/heart-2.mp4", sound:"work/heart-sound.m4a",
+    media:[ {img:"work/heart-photo.jpg"}, {video:"work/heart-1.mp4"}, {video:"work/heart-2.mp4"}, {video:"work/heart-3.mp4"} ] },
   { page:"art", title:"Jump Into the Void", type:"Four-screen animation", image:"work/void.jpg", video:"work/void-preview.mp4", full:"work/void.mp4" },
-  { page:"art", title:"Pulse",         type:"Installation",   image:"", video:"", link:"" },
   { page:"work", title:"Project title", type:"Product launch", image:"", video:"", link:"" },
   { page:"work", title:"Project title", type:"UI motion",      image:"", video:"", link:"" },
   { page:"work", title:"Project title", type:"Social",         image:"", video:"", link:"" },
   { page:"work", title:"Project title", type:"Brand",          image:"", video:"", link:"" },
 ];
 /* ======================================================================== */
+
+// Background sound for projects that have one (plays only when the visitor presses the button)
+let snd=null,sndSrc='';
+const lbsnd=document.getElementById('lbsnd');
+function syncSound(){
+  const on=!!(snd&&!snd.paused);
+  document.querySelectorAll('.snd').forEach(b=>{b.textContent=on?'Sound on':'Sound off';b.setAttribute('aria-pressed',String(on))});
+}
+function toggleSound(src){
+  if(!snd||sndSrc!==src){if(snd)snd.pause();snd=new Audio(src);snd.loop=true;sndSrc=src;snd.addEventListener('pause',syncSound);snd.addEventListener('play',syncSound)}
+  snd.paused?snd.play().catch(()=>{}):snd.pause();
+  syncSound();
+}
 
 // Full-screen player: photos, a full video, or a set of videos
 const lb=document.getElementById('lb'),lbv=document.getElementById('lbv'),lbt=document.getElementById('lbt');
@@ -318,6 +340,7 @@ function showSlide(i){
   const sl=slides[si];
   lbv.pause();
   if(sl.video){
+    lbv.loop=!!sl.loop;lbv.muted=!!sl.loop;
     lbimg.hidden=true;lbv.hidden=false;lbv.src=sl.video;lbv.poster=sl.poster||'';lbv.play().catch(()=>{});
   }else{
     lbv.hidden=true;lbv.removeAttribute('src');lbimg.hidden=false;lbimg.src=sl.img;lbimg.alt=slideTitle+' '+(si+1);
@@ -329,9 +352,11 @@ function showSlide(i){
 function openPlayer(p,start){
   slideTitle=p.title;
   if(p.photos){slides=p.photos.map(src=>({img:src}));p.photos.forEach(src=>{const i=new Image();i.src=src})}
+  else if(p.media){slides=p.media.map(m=>m.video?{video:m.video,loop:true}:{img:m.img})}
   else if(p.reels){slides=p.reels.map(r=>({video:r.full,poster:r.poster,name:r.name}))}
   else{slides=[{video:p.full,poster:p.image,name:p.type}]}
   showSlide(start||0);
+  lbsnd.hidden=!p.sound;if(p.sound)lbsnd.onclick=()=>toggleSound(p.sound);syncSound();
   lb.hidden=false;document.body.style.overflow='hidden';
   document.getElementById('lbclose').focus();
 }
@@ -362,7 +387,7 @@ addEventListener('keydown',e=>{
     const a=document.createElement('a');
     a.className='item';a.href=p.link||'#work';
     if(p.link&&!p.full&&!p.photos){a.target='_blank';a.rel='noopener'}
-    if((p.full||p.photos)&&!p.reels)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
+    if((p.full||p.photos||p.media)&&!p.reels)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
     if(p.reels)a.addEventListener('click',e=>e.preventDefault());
     const box=document.createElement('div');box.className='img';
     if(p.reels){
@@ -385,7 +410,7 @@ addEventListener('keydown',e=>{
       if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&imgs.length>1){
         let k=0;setInterval(()=>{imgs[k].classList.remove('on');k=(k+1)%imgs.length;imgs[k].classList.add('on')},3000);
       }
-    }else if(p.image){const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
+    }else if(p.image){if(p.fit==='contain')box.classList.add('float');const im=document.createElement('img');im.src=p.image;im.alt=p.title;im.loading='lazy';box.appendChild(im)}
     if(p.video){
       const v=document.createElement('video');v.src=p.video;v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
       if(p.image){v.poster=p.image;box.innerHTML=''}
@@ -396,6 +421,11 @@ addEventListener('keydown',e=>{
     const cap=document.createElement('div');cap.className='cap';
     cap.innerHTML='<span></span><span class="mono"></span>';
     cap.children[0].textContent=p.title;cap.children[1].textContent=p.type;
+    if(p.sound){
+      const b=document.createElement('button');b.type='button';b.className='snd';b.textContent='Sound off';b.setAttribute('aria-pressed','false');
+      b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleSound(p.sound)});
+      cap.children[0].appendChild(b);
+    }
     a.append(box,cap);grid.appendChild(a);
   });
 })();
