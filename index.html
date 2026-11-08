@@ -65,6 +65,12 @@ section{padding:96px 0 0}
 .item .img.slides.float img,.item .img.slides img.tall{object-fit:contain}
 .item .img.slides img.on{opacity:1}
 .item:hover .img{opacity:.85}
+/* a row of vertical social videos */
+.item .img.reels{aspect-ratio:auto;max-height:none;background:none;display:flex;gap:12px;justify-content:center;overflow:visible}
+.item .img.reels:hover{opacity:1}
+.item .img.reels video{position:static;width:calc((100% - 48px)/5);height:auto;aspect-ratio:9/16;object-fit:cover;cursor:pointer;transition:opacity .3s}
+.item .img.reels video:hover{opacity:.8}
+@media (max-width:700px){.item .img.reels{flex-wrap:wrap;gap:8px}.item .img.reels video{width:calc((100% - 16px)/3)}}
 .item .cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:14px}
 
 .about{display:grid;grid-template-columns:1fr 1fr;gap:32px;border-top:1px solid var(--line);padding-top:28px}
@@ -112,8 +118,8 @@ body[data-page="contact"] footer{visibility:hidden}
 .lb-in{width:min(1200px,100%);display:grid;gap:12px}
 .lb-top{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .lb-top button{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(243,239,232,.35);border-radius:999px;padding:8px 14px;cursor:pointer}
-.lb video{width:100%;max-height:80vh;background:#000;display:block}
-.lb video[hidden],.lb-photo[hidden]{display:none}
+.lb video{max-width:100%;max-height:80vh;background:#000;display:block}
+.lb video[hidden],.lb img[hidden]{display:none}
 .lb-photo{position:relative;display:grid;place-items:center}
 .lb-photo img{max-width:100%;max-height:80vh;display:block;user-select:none}
 .lb-photo .nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(243,239,232,.35);background:rgba(0,0,0,.4);color:var(--ink);font:28px/1 var(--display);cursor:pointer;display:grid;place-items:center}
@@ -259,11 +265,11 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbt">
   <div class="lb-in">
     <div class="lb-top"><span class="mono" id="lbt"></span><button type="button" id="lbclose">Close</button></div>
-    <video id="lbv" controls playsinline></video>
-    <div class="lb-photo" id="lbp" hidden>
-      <img id="lbimg" alt="">
-      <button type="button" class="nav prev" id="lbprev" aria-label="Previous photo">‹</button>
-      <button type="button" class="nav next" id="lbnext" aria-label="Next photo">›</button>
+    <div class="lb-photo" id="lbp">
+      <video id="lbv" controls playsinline hidden></video>
+      <img id="lbimg" alt="" hidden>
+      <button type="button" class="nav prev" id="lbprev" aria-label="Previous">‹</button>
+      <button type="button" class="nav next" id="lbnext" aria-label="Next">›</button>
     </div>
   </div>
 </div>
@@ -276,8 +282,16 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
    video  : optional short muted loop (.mp4), plays on hover
    full   : optional full video with sound (.mp4), opens in a player on click
    photos : optional list of images, opens as a slideshow on click
+   reels  : optional list of short vertical videos {name, loop, full, poster}
    link   : optional, where a click goes if there is no full video             */
 const PROJECTS = [
+  { page:"work", title:"Mayven", type:"Motion design for social", reels:[
+      { name:"Screen Collagen", loop:"work/mayven-1-loop.mp4", full:"work/mayven-1.mp4", poster:"work/mayven-1.jpg" },
+      { name:"Lemon Smash", loop:"work/mayven-2-loop.mp4", full:"work/mayven-2.mp4", poster:"work/mayven-2.jpg" },
+      { name:"Green Substance", loop:"work/mayven-3-loop.mp4", full:"work/mayven-3.mp4", poster:"work/mayven-3.jpg" },
+      { name:"Must Have", loop:"work/mayven-4-loop.mp4", full:"work/mayven-4.mp4", poster:"work/mayven-4.jpg" },
+      { name:"Scan Grid", loop:"work/mayven-5-loop.mp4", full:"work/mayven-5.mp4", poster:"work/mayven-5.jpg" }
+    ] },
   { page:"work", title:"Heaven Scent",  type:"Music video edit", image:"work/heavenscent.jpg", video:"work/heavenscent-preview.mp4", full:"work/heavenscent.mp4" },
   { page:"art", title:"Photography",   type:"Stills", image:"work/photo-1.jpg",
     photos:["work/photo-1.jpg","work/photo-2.jpg","work/photo-3.jpg","work/photo-4.jpg"] },
@@ -295,58 +309,73 @@ const PROJECTS = [
 ];
 /* ======================================================================== */
 
-// Full-screen player for projects with a full video
+// Full-screen player: photos, a full video, or a set of videos
 const lb=document.getElementById('lb'),lbv=document.getElementById('lbv'),lbt=document.getElementById('lbt');
 const lbp=document.getElementById('lbp'),lbimg=document.getElementById('lbimg');
-let slides=null,si=0,slideTitle='';
+let slides=[],si=0,slideTitle='';
 function showSlide(i){
   si=(i+slides.length)%slides.length;
-  lbimg.src=slides[si];lbimg.alt=slideTitle+' '+(si+1);
-  lbt.textContent=slides.length>1?slideTitle+' · '+(si+1)+' / '+slides.length:slideTitle;
+  const sl=slides[si];
+  lbv.pause();
+  if(sl.video){
+    lbimg.hidden=true;lbv.hidden=false;lbv.src=sl.video;lbv.poster=sl.poster||'';lbv.play().catch(()=>{});
+  }else{
+    lbv.hidden=true;lbv.removeAttribute('src');lbimg.hidden=false;lbimg.src=sl.img;lbimg.alt=slideTitle+' '+(si+1);
+  }
+  const name=sl.name?slideTitle+' · '+sl.name:slideTitle;
+  lbt.textContent=slides.length>1?name+' · '+(si+1)+' / '+slides.length:name;
   lbp.classList.toggle('single',slides.length<2);
 }
-function openPlayer(p){
-  if(p.photos){
-    slides=p.photos;slideTitle=p.title;lbv.hidden=true;lbp.hidden=false;showSlide(0);
-    slides.forEach(src=>{const i=new Image();i.src=src});
-  }else{
-    slides=null;lbp.hidden=true;lbv.hidden=false;
-    lbt.textContent=p.title+' · '+p.type;
-    lbv.src=p.full;lbv.poster=p.image||'';lbv.play().catch(()=>{});
-  }
+function openPlayer(p,start){
+  slideTitle=p.title;
+  if(p.photos){slides=p.photos.map(src=>({img:src}));p.photos.forEach(src=>{const i=new Image();i.src=src})}
+  else if(p.reels){slides=p.reels.map(r=>({video:r.full,poster:r.poster,name:r.name}))}
+  else{slides=[{video:p.full,poster:p.image,name:p.type}]}
+  showSlide(start||0);
   lb.hidden=false;document.body.style.overflow='hidden';
   document.getElementById('lbclose').focus();
 }
 function closePlayer(){
-  if(!lbv.hidden){lbv.pause();lbv.removeAttribute('src');lbv.load()}
-  slides=null;lb.hidden=true;document.body.style.overflow='';
+  lbv.pause();lbv.removeAttribute('src');lbv.load();
+  slides=[];lb.hidden=true;document.body.style.overflow='';
 }
 document.getElementById('lbprev').addEventListener('click',()=>showSlide(si-1));
 document.getElementById('lbnext').addEventListener('click',()=>showSlide(si+1));
 lbimg.addEventListener('click',()=>showSlide(si+1));
 let tx=null;
 lbp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
-lbp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)showSlide(si+(dx<0?1:-1));tx=null});
+lbp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40&&slides.length>1)showSlide(si+(dx<0?1:-1));tx=null});
 document.getElementById('lbclose').addEventListener('click',closePlayer);
 lb.addEventListener('click',e=>{if(e.target===lb)closePlayer()});
 addEventListener('keydown',e=>{
   if(lb.hidden)return;
   if(e.key==='Escape')closePlayer();
-  if(slides&&e.key==='ArrowRight')showSlide(si+1);
-  if(slides&&e.key==='ArrowLeft')showSlide(si-1);
+  if(slides.length>1&&e.key==='ArrowRight')showSlide(si+1);
+  if(slides.length>1&&e.key==='ArrowLeft')showSlide(si-1);
 });
 
 (function(){
   PROJECTS.forEach(p=>{
     // projects without any image or video yet stay hidden until media is added
-    if(!p.image&&!p.video&&!p.photos)return;
+    if(!p.image&&!p.video&&!p.photos&&!p.reels)return;
     const grid=document.getElementById(p.page==='art'?'grid-art':'grid-work');
     const a=document.createElement('a');
     a.className='item';a.href=p.link||'#work';
     if(p.link&&!p.full&&!p.photos){a.target='_blank';a.rel='noopener'}
-    if(p.full||p.photos)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
+    if((p.full||p.photos)&&!p.reels)a.addEventListener('click',e=>{e.preventDefault();openPlayer(p)});
+    if(p.reels)a.addEventListener('click',e=>e.preventDefault());
     const box=document.createElement('div');box.className='img';
-    if(p.photos){
+    if(p.reels){
+      // a row of short vertical videos, all playing silently; click one to watch it with sound
+      box.classList.add('reels');
+      p.reels.forEach((r,k)=>{
+        const v=document.createElement('video');v.src=r.loop;v.poster=r.poster;v.muted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload='metadata';
+        v.setAttribute('aria-label',p.title+': '+r.name);
+        v.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPlayer(p,k)});
+        box.appendChild(v);
+      });
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches)box.querySelectorAll('video').forEach(v=>{v.autoplay=false});
+    }else if(p.photos){
       // photo projects: show every photo in turn, one every 3 seconds
       box.classList.add('slides');if(p.fit==='contain')box.classList.add('float');
       const imgs=p.photos.map((src,k)=>{const im=document.createElement('img');im.src=src;im.alt=p.title+' '+(k+1);im.loading=k?'lazy':'eager';if(!k)im.classList.add('on');
