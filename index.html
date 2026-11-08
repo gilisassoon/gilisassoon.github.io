@@ -95,8 +95,8 @@ body:not([data-page="home"]) .home{display:none}
 .home{min-height:calc(100vh - 260px);display:grid;place-content:center}
 .home .hero{padding:0}
 .home .pulse{max-width:min(300px,70vw);margin:40px auto 0;gap:10px}
-/* heartbeat line and tap dot are switched off: the frame stays empty (the sound engine still lives in that script) */
-.home .frame canvas,.home .tap{display:none}
+/* frame and heartbeat are switched off on the home page (the sound engine still lives in that script) */
+.home .pulse{display:none}
 .home .tap i{width:9px;height:9px}
 .home .tap .mono{font-size:11px}
 .pagehead{text-align:center;margin-bottom:8vh}
