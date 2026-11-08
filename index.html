@@ -150,6 +150,9 @@ footer a:hover{color:var(--muted)}
   header nav{gap:18px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}
+.sitesnd{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));z-index:15;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid rgba(243,239,232,.3);border-radius:999px;padding:7px 14px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sitesnd:hover,.sitesnd[aria-pressed="true"]{border-color:var(--ink)}
+body:has(.lb:not([hidden])) .sitesnd{display:none}
 /* keep content clear of the phone notch and home bar */
 .wrap{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
 header{padding-top:max(28px,env(safe-area-inset-top))}
@@ -277,6 +280,8 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
     </ul>
   </section>
 
+  <button type="button" class="sitesnd" id="sitesnd" aria-pressed="false">Sound off</button>
+
   <footer id="foot">
     <a href="mailto:gili1307@gmail.com">gili1307@gmail.com</a>
     <div class="links">
@@ -314,7 +319,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
 const PROJECTS = [
   { page:"work", title:"Mayven", type:"Motion design for social", reels:[
       { name:"Screen Collagen", loop:"work/mayven-1-loop.mp4", full:"work/mayven-1.mp4", poster:"work/mayven-1.jpg" },
-      { name:"Lemon Smash", loop:"work/mayven-2-loop.mp4", full:"work/mayven-2.mp4", poster:"work/mayven-2.jpg" },
+      { name:"Collagen Smoothie", loop:"work/mayven-2b-loop.mp4", full:"work/mayven-2b.mp4", poster:"work/mayven-2b.jpg" },
       { name:"Green Substance", loop:"work/mayven-3-loop.mp4", full:"work/mayven-3.mp4", poster:"work/mayven-3.jpg" },
       { name:"Must Have", loop:"work/mayven-4-loop.mp4", full:"work/mayven-4.mp4", poster:"work/mayven-4.jpg" },
       { name:"Scan Grid", loop:"work/mayven-5-loop.mp4", full:"work/mayven-5.mp4", poster:"work/mayven-5.jpg" }
@@ -354,6 +359,7 @@ function toggleSound(src){
   if(!snd||sndSrc!==src){if(snd)snd.pause();snd=new Audio(src);snd.loop=true;sndSrc=src;snd.addEventListener('pause',syncSound);snd.addEventListener('play',syncSound)}
   snd.paused?snd.play().catch(()=>{}):snd.pause();
   syncSound();
+  if(window.siteSound)window.siteSound.duck(!snd.paused);
 }
 
 // Full-screen player: photos, a full video, or a set of videos
@@ -364,6 +370,7 @@ function showSlide(i){
   si=(i+slides.length)%slides.length;
   const sl=slides[si];
   lbv.pause();
+  if(window.siteSound)window.siteSound.duck(!!(sl.video&&!sl.loop)||!!(snd&&!snd.paused));
   if(sl.video){
     lbv.loop=!!sl.loop;lbv.muted=!!sl.loop;
     lbimg.hidden=true;lbv.hidden=false;lbv.src=sl.video;lbv.poster=sl.poster||'';lbv.play().catch(()=>{});
@@ -388,6 +395,7 @@ function openPlayer(p,start){
 function closePlayer(){
   lbv.pause();lbv.removeAttribute('src');lbv.load();
   slides=[];lb.hidden=true;document.body.style.overflow='';
+  if(window.siteSound)window.siteSound.duck(!!(snd&&!snd.paused));
 }
 document.getElementById('lbprev').addEventListener('click',()=>showSlide(si-1));
 document.getElementById('lbnext').addEventListener('click',()=>showSlide(si+1));
@@ -513,7 +521,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     if(!beats.length){let t=from;while(t<now+1){beats.push(newBeat(t));t+=60/cur}}
     let last=beats[beats.length-1];
     while(last.t<now+1){
-      const gap=(60/cur)*(1+rnd(-.05,.05));   // small natural variation between beats
+      const gap=(60/cur)*(1+rnd(-.03,.03));   // small natural variation between beats
       last=newBeat(last.t+gap);beats.push(last);
     }
   }
@@ -523,30 +531,80 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     return v;
   }
 
-  let flashUntil=0,lastSeen=0;
+  // ---- Site sound: a soft low drone with heartbeat thumps on the same beats as the line ----
+  // Made live in the browser (no audio file). It only starts when the visitor asks for it.
+  let actx=null,master=null,soundOn=false,duckLevel=1;
+  const sndBtn=document.getElementById('sitesnd');
+  function buildAudio(){
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    master=actx.createGain();master.gain.value=0;master.connect(actx.destination);
+    const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;lp.Q.value=.7;
+    const drone=actx.createGain();drone.gain.value=.5;lp.connect(drone);drone.connect(master);
+    [[55,0,'sine',.6],[82.41,4,'sine',.35],[110,-6,'triangle',.12]].forEach(([f,det,type,vol])=>{
+      const o=actx.createOscillator();o.type=type;o.frequency.value=f;o.detune.value=det;
+      const g=actx.createGain();g.gain.value=vol;o.connect(g);g.connect(lp);o.start();
+    });
+    // slow movement so the drone breathes
+    const lfo=actx.createOscillator();lfo.frequency.value=.06;const lfoAmt=actx.createGain();lfoAmt.gain.value=160;
+    lfo.connect(lfoAmt);lfoAmt.connect(lp.frequency);lfo.start();
+    const lfo2=actx.createOscillator();lfo2.frequency.value=.11;const lfo2Amt=actx.createGain();lfo2Amt.gain.value=.12;
+    lfo2.connect(lfo2Amt);lfo2Amt.connect(drone.gain);lfo2.start();
+  }
+  function setLevel(){
+    if(!master)return;
+    const t=actx.currentTime;master.gain.cancelScheduledValues(t);
+    master.gain.setTargetAtTime(soundOn?.22*duckLevel:0,t,soundOn?1.2:.35);
+  }
+  function startSound(){
+    if(!actx)buildAudio();
+    actx.resume();soundOn=true;setLevel();syncSiteBtn();
+  }
+  function stopSound(){soundOn=false;setLevel();syncSiteBtn()}
+  function syncSiteBtn(){
+    if(!sndBtn)return;
+    sndBtn.textContent=soundOn?'Sound on':'Sound off';sndBtn.setAttribute('aria-pressed',String(soundOn));
+  }
+  function thump(strength){
+    if(!soundOn||!actx)return;
+    const t0=actx.currentTime+.01;
+    [[0,1],[.17,.6]].forEach(([off,amp])=>{          // lub ... dub
+      const o=actx.createOscillator();o.type='sine';
+      o.frequency.setValueAtTime(95,t0+off);o.frequency.exponentialRampToValueAtTime(46,t0+off+.12);
+      const g=actx.createGain();g.gain.setValueAtTime(.0001,t0+off);
+      g.gain.exponentialRampToValueAtTime(.9*amp*Math.min(1,strength||1),t0+off+.008);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+off+.32);
+      o.connect(g);g.connect(master);o.start(t0+off);o.stop(t0+off+.35);
+    });
+  }
+  // other sounds on the site (videos, the installation track) turn the drone down while they play
+  window.siteSound={duck(on){duckLevel=on?.12:1;setLevel()}};
+  if(sndBtn)sndBtn.addEventListener('click',()=>soundOn?stopSound():startSound());
+
+  let flashUntil=0,lastSeen=0,drawnOnce=false;
   function draw(time){
     // re-measure if the frame changed size (or was hidden when the page loaded)
     if(c.clientWidth!==w||c.clientHeight!==h)size();
-    if(!w||!h){if(!reduce)requestAnimationFrame(draw);return}
-    speed=Math.max(40,w/3);    // always about three seconds of heartbeat across the frame
     const now=time/1000;
     cur+=((base+hover)-cur)*.03;
+    speed=w?Math.max(90,w/2):120;   // about two seconds of heartbeat across the frame
     fill(now);
+    // each beat reaching the end of the line blinks the dot and, with sound on, plays a soft thump
+    const hit=beats.find(b=>b.t<=now&&b.t>lastSeen);
+    if(hit){lastSeen=hit.t;flashUntil=now+.12;thump(hit.r)}
+    if(!tapping) tapBtn.classList.toggle('on',now<flashUntil);
+    if(!w||!h||(reduce&&drawnOnce)){requestAnimationFrame(draw);return}
+    drawnOnce=true;
     ctx.clearRect(0,0,w,h);
     const grad=ctx.createLinearGradient(0,0,w,0);
     grad.addColorStop(0,'rgba(243,239,232,0)');grad.addColorStop(.15,ink);grad.addColorStop(.85,ink);grad.addColorStop(1,'rgba(243,239,232,0)');
     ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.lineCap='round';
     ctx.beginPath();
-    for(let x=0;x<=w;x+=1){
+    for(let x=0;x<=w;x+=.33){
       const y=h*.66-signal(now-(w-x)/speed)*h*.55;
       x?ctx.lineTo(x,y):ctx.moveTo(x,y);
     }
     ctx.stroke();
-    // the dot blinks as each beat reaches it
-    const hit=beats.find(b=>b.t<=now&&b.t>lastSeen);
-    if(hit){lastSeen=hit.t;flashUntil=now+.12}
-    if(!tapping) tapBtn.classList.toggle('on',now<flashUntil);
-    if(!reduce)requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
 
@@ -568,6 +626,7 @@ addEventListener('load',()=>setTimeout(()=>scrollTo(0,0),0));
     base=Math.max(40,Math.min(180,Math.round(60000/iv)));
     bpmEl.textContent=base;
     taps=[];
+    if(!soundOn)startSound();
   });
   if(reduce)bpmEl.textContent=base;
 })();
