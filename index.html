@@ -127,6 +127,9 @@ body[data-page="contact"] footer{visibility:hidden}
 .cv .proj{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:12px 0 0}
 .cv .proj dt{font-style:italic}
 .cv .proj dd{margin:0;color:var(--muted)}
+.cv .note{margin:6px 0 0;color:var(--ink)}
+.skillcols{display:grid;grid-template-columns:1fr 1fr;gap:24px;justify-items:center;align-items:start;text-align:center}
+.skillcols .skills{gap:6px}
 @media (max-width:520px){.cv .row{grid-template-columns:1fr;gap:4px}.cv .proj{grid-template-columns:1fr}.cv .proj dd{margin-bottom:6px}}
 
 .lb{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.92);display:grid;place-items:center;padding:24px}
@@ -222,10 +225,9 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
           <div>
             <b>Multimedia Artist &amp; Motion Designer</b> <span class="dim">Freelance / independent projects</span>
             <ul>
-              <li>Design and animation: complex visual projects and 3D animation in After Effects and Blender.</li>
-              <li>Production, directing and editing: led end-to-end video production, from filming and directing to editing.</li>
-              <li>Interactive experiences and sound: designed and set up art installations combining sound design (Ableton Live) and interactive visuals (TouchDesigner).</li>
-              <li>Video documentation for dance performances and movement-based projects.</li>
+              <li>Motion design and 3D animation in After Effects and Blender.</li>
+              <li>End-to-end video production: filming, directing and editing.</li>
+              <li>Immersive installations combining sound (Ableton Live) and interactive visuals (TouchDesigner).</li>
             </ul>
             <dl class="proj">
               <dt>Blessings</dt><dd>Directed and edited a short documentary about a visual artist based in Berlin.</dd>
@@ -239,10 +241,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
           <span class="mono yr">2020 – 2022</span>
           <div>
             <b>Team Commander</b> <span class="dim">"Dog Center" Unit, Israeli Air Force</span>
-            <ul>
-              <li>Commanded, managed and led soldiers in a dynamic, operational and demanding environment.</li>
-              <li>Responsible for meeting targets, managing tasks and supporting the personal and professional development of team members.</li>
-            </ul>
+            <p class="note">Led and developed a team of soldiers in a demanding operational unit.</p>
           </div>
         </div>
 
@@ -257,21 +256,25 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
         </div>
 
         <h3 class="mono">Skills</h3>
-        <ul class="skills">
-          <li>Video editing</li>
-          <li>Sound design</li>
-          <li>Motion design</li>
-          <li>Photography</li>
-          <li>Illustration</li>
-          <li>Interactive installation</li>
-          <li class="gap">Adobe After Effects</li>
-          <li>Adobe Premiere Pro</li>
-          <li>Adobe Photoshop</li>
-          <li>TouchDesigner</li>
-          <li>Blender</li>
-          <li>DaVinci Resolve</li>
-          <li>Ableton Live</li>
-        </ul>
+        <div class="skillcols">
+          <ul class="skills">
+            <li>Video editing</li>
+            <li>Motion design</li>
+            <li>Sound design</li>
+            <li>Photography</li>
+            <li>Illustration</li>
+            <li>Interactive installation</li>
+          </ul>
+          <ul class="skills">
+            <li>Adobe After Effects</li>
+            <li>Adobe Premiere Pro</li>
+            <li>Adobe Photoshop</li>
+            <li>DaVinci Resolve</li>
+            <li>Blender</li>
+            <li>TouchDesigner</li>
+            <li>Ableton Live</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
