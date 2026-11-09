@@ -202,7 +202,7 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
     <div class="about">
       <div class="cvhead"><h2>CV</h2></div>
       <div class="cv">
-        <p>Multimedia artist and creator, 25, specializing in motion design, video production, 3D animation and interactive audio-visual experiences. I combine technical execution with strong environmental and emotional storytelling, and I'm looking to bring my creativity, art background and technical skills to a motion designer position.</p>
+        <p>Multimedia artist and creator, 25, exploring motion design, video production, 3D animation and interactive audio-visual experiences. I combine technical execution with strong environmental and emotional storytelling, and I'm looking to bring my creativity, art background and technical skills to a motion designer position.</p>
 
         <h3 class="mono">Experience</h3>
         <div class="row">
@@ -353,6 +353,9 @@ const PROJECTS = [
   { page:"work", title:"Project title", type:"Brand",          image:"", video:"", link:"" },
 ];
 /* ======================================================================== */
+
+// Older phones can't show .webp images: swap in the .jpg version of the same picture
+addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&/\.webp$/.test(t.getAttribute('src')||'')){t.src=t.getAttribute('src').replace(/\.webp$/,'.jpg')}},true);
 
 // Silent looping videos: iPhones only autoplay a video if it is muted *in the markup* and plays inline.
 // Each one plays while it is on screen and pauses when it scrolls away. If the phone still blocks it
