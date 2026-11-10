@@ -115,6 +115,9 @@ body:not([data-page="home"]) .home{display:none}
 .home .tap i{width:9px;height:9px}
 .home .tap .mono{font-size:11px}
 .pagehead{text-align:center;margin-bottom:8vh}
+.subhead{text-align:center;margin:18vh 0 8vh}
+.subhead h3{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(36px,5vw,64px);line-height:.9;margin:0;letter-spacing:.02em}
+#work .subhead:has(+ .grid:empty){display:none}
 .pagehead h2,.cvhead h2{font-family:var(--display);font-weight:300;font-variation-settings:"opsz" 100;font-size:clamp(56px,8vw,110px);line-height:.9;margin:0;letter-spacing:.02em}
 header nav a.on{color:var(--muted)}
 .contact{list-style:none;margin:0 auto;padding:0;display:grid;gap:34px;justify-items:center;text-align:center}
@@ -208,6 +211,8 @@ footer{padding-bottom:max(40px,env(safe-area-inset-bottom))}
   <section id="work" class="page" aria-label="Work">
     <div class="pagehead"><h2>Work</h2></div>
     <div class="grid" id="grid-work"></div>
+    <div class="subhead"><h3>Motion</h3></div>
+    <div class="grid" id="grid-motion"></div>
   </section>
 
   <section id="art" class="page" aria-label="Art">
@@ -347,8 +352,11 @@ const PROJECTS = [
       { name:"Must Have", loop:"work/mayven-4-loop.mp4", full:"work/mayven-4.mp4", poster:"work/mayven-4.jpg" },
       { name:"Scan Grid", loop:"work/mayven-5-loop.mp4", full:"work/mayven-5.mp4", poster:"work/mayven-5.jpg" }
     ] },
-  { page:"work", title:"Transparency Is Freedom", type:"Kinetic typography", reels:[
+  { page:"work", section:"motion", title:"Transparency Is Freedom", type:"Kinetic typography", reels:[
       { name:"Transparency Is Freedom", loop:"work/transparency.mp4", full:"work/transparency.mp4", poster:"work/transparency.jpg" }
+    ] },
+  { page:"work", section:"motion", title:"Stars", type:"Motion", reels:[
+      { name:"Stars", loop:"work/stars.mp4", full:"work/stars.mp4", poster:"work/stars.jpg" }
     ] },
   { page:"work", title:"Dynamic Connectivity", type:"Dance documentation · choreography by Shira Shiryan", row:true,
     media:[ {video:"work/dance-1-bw-loop.mp4", full:"work/dance-1-bw.mp4", poster:"work/dance-1-bw.jpg", ar:1.778},
@@ -466,7 +474,7 @@ addEventListener('keydown',e=>{
   PROJECTS.forEach(p=>{
     // projects without any image or video yet stay hidden until media is added
     if(!p.image&&!p.video&&!p.photos&&!p.reels&&!p.media)return;
-    const grid=document.getElementById(p.page==='art'?'grid-art':'grid-work');
+    const grid=document.getElementById(p.section==='motion'?'grid-motion':p.page==='art'?'grid-art':'grid-work');
     const a=document.createElement('a');
     a.className='item';a.href=p.link||'#work';
     if(p.link&&!p.full&&!p.photos){a.target='_blank';a.rel='noopener'}
